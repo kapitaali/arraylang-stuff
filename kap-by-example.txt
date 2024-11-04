@@ -1,0 +1,252 @@
+⍝ Kap BY EXAMPLE
+⍝ Kap is product of DHS Developments https://kapdemo.dhsdevelopments.com/
+⍝ (C) Teppo Saari https://github.com/kapitaali
+⍝ based on J vs K by example by
+⍝ (C) Oleg Kobchenko  http://olegykj.sourceforge.net
+
+⍝ THIS IS A WORK IN PROGRESS
+
+⍝ note on return values ===============================================
+⍝ vectors are boxed, a simple scalar is not boxed;
+⍝ a box around a single number is a vector of length one
+
+
+⍝ simple arithmetic ===============================================
+
+   2 + 2         ⍝ comment is '⍝'
+4
+   2 - 3         ⍝ negative numbers use '¯'
+-1
+   2 × 3 + 4     ⍝ no precedence, right to left
+14
+   (2 × 3) + 4   ⍝ parentheses changes order
+10
+   3 ÷ 4         ⍝ division represented by '%'
+3/4
+   4*2           ⍝ square
+16
+   √4            ⍝ square root
+2.0
+   ÷ 4           ⍝ 1/x
+1/4
+
+
+⍝ operations using lists ==========================================
+   
+   2 * 1 2 3            ⍝ numeric list with space separators
+┌→────┐
+│2 4 8│
+└─────┘
+   1 2 3 ÷ 2 4 6        ⍝ list to list operations, same size
+┌→──────────┐
+│1/2 1/2 1/2│
+└───────────┘
+   ⍴1 2 3               ⍝ size of vector
+┌→┐
+│3│
+└─┘
+   3⍴1                  ⍝ generate sequence of same numbers
+┌→────┐
+│1 1 1│
+└─────┘
+   5⍴1 2                ⍝ or from a list of given elements
+┌→────────┐
+│1 2 1 2 1│
+└─────────┘
+
+
+⍝ list elements ===================================================
+
+   1↑1 2 3              ⍝ first element
+┌→┐
+│1│
+└─┘
+   ¯1↑1 2 3             ⍝ last element
+┌→┐
+│3│
+└─┘
+   ↓1 2 3               ⍝ rest without first element
+┌→──┐
+│2 3│
+└───┘
+   ¯1↓1 2 3             ⍝ rest without last element
+┌→──┐
+│1 2│
+└───┘
+   ⌽1 2 3               ⍝ reverse
+┌→────┐
+│3 2 1│
+└─────┘
+
+
+⍝ indexing and sorting ============================================
+
+   1⊃1 2 3              ⍝ indexing is zero-based
+2
+   1 0⊇1 2 3            ⍝ index can be vector too
+┌→──┐
+│2 1│
+└───┘
+   ⍳3                   ⍝ generate zero-based sequence
+┌→────┐
+│0 1 2│
+└─────┘
+   2 4 6 ⍳ 4            ⍝ index of given element(s)
+1
+   ⍋2 1 6               ⍝ indices of sorted order
+┌→────┐
+│1 0 2│
+└─────┘
+   ∧2 1 6               ⍝ sort vector
+1 2 6                   ⍝ F~y <=> y F y
+
+
+⍝ list aggregation ================================================
+   
+   1 2 3,10 20          ⍝ join vectors
+┌→──────────┐
+│1 2 3 10 20│
+└───────────┘
+   1 + 2 + 3            ⍝ sum of elements
+6
+   +/1 2 3              ⍝ insert '+' between elements
+6
+   +\1 2 3              ⍝ running sum of elements
+┌→────┐
+│1 3 6│
+└─────┘
+   1,(1+2),(1+2+3)      ⍝ same as this
+┌→────┐
+│1 3 6│
+└─────┘
+   2 +/ 1 2 3 4 5       ⍝ sum or running pairs
+┌→──────┐
+│3 5 7 9│
+└───────┘
+   _2+/\1 2 3 4 5       ⍝ non-intersecting pairs
+3 7 5
+   (⊂1 2),(3 4 6)(7 6)  ⍝ ⊂ is boxing 
+┌→──────────────────┐
+│┌→──┐ ┌→────┐ ┌→──┐│
+││1 2│ │3 4 6│ │7 6││
+│└───┘ └─────┘ └───┘│
+└───────────────────┘
+   ⊃↑(3 4 6)(7 6)       ⍝ ⊃ is unboxing, but it does not do anything in this case
+┌→────┐
+│3 4 6│
+└─────┘
+
+
+⍝ function combinations ===========================================
+   
+   (+∘{⍵*2}) 4          ⍝ hook (F G) y <=> y F (G y)
+20                      ⍝     a + a^2
+   √«,»{⍵*2} 4          ⍝ fork (F G H) y <=> (F y) G (H y)
+┌→─────┐                ⍝    [sqrt(a), a^2]
+│2.0 16│
+└──────┘                    
+   {⍵*2}+/2 3           ⍝ composition (F o G) y <=> F G y
+25                      ⍝    (a + b)^2
+   +/{⍵*2}2 3           ⍝ x F & G y <=> (G x) F (G y)
+13                      ⍝    a^2 + b^2
+{+/(+/⍵*2),(2××/⍵)}2 3  ⍝ (a + b)^2 = a^2 + b^2 + 2ab
+25                      ⍝    
+   {√(+/⍵*2)}3 4        ⍝    sqrt(a^2 + b^2)
+5                       ⍝ 
+
+
+⍝ user defined functions and arguments ============================
+
+   m1 ← λ-              ⍝ monadic projection     
+   m2 ← λ(0-)           ⍝ monadic projection
+   m3 ← λ{-⍵}           ⍝ explicit monad
+   arrayOfMonads ← m1 m2 m3
+                        ⍝ monads
+   4 {⍞⍵ ⍺}¨ arrayOfMonads
+┌→───────┐
+│-4 -4 -4│
+└────────┘
+
+   d1 ← λ-              ⍝ dyadic projection 
+   d2 ← {⍺-⍵}           ⍝ explixit dyad
+   arrayOfDyads ← d1 d2 ⍝ dyads
+
+⍝ todo:
+   4 someFunction arrayOfMonads
+┌→─────┐
+│-1 -1 │
+└──────┘
+
+
+⍝ exponent and logarithm ==========================================
+
+   (⋆1), (2×⋆1), (⋆2)   ⍝ e, 2e, e squared
+┌→────────────────────────────────────────────────────┐
+│2.7182818284590455 5.436563656918091 7.38905609893065│
+└─────────────────────────────────────────────────────┘
+   ⋆2                   ⍝ exponent, e squared
+7.38905609893065
+   2*16                 ⍝ exponent base 2, 2^16
+65536
+   ⍟(*2)                ⍝ logarithm, ln e^2
+2.0
+   2⍟65536              ⍝ logarithm base 2, log2 65536
+16.0
+
+
+⍝ trigonometry ====================================================
+   
+   pi←2×math:asin 1     ⍝ pi
+   pi,(2×pi),(pi*2)     ⍝ pi, 2pi, pi squared
+┌→────────────────────────────────────────────────────┐
+│3.141592653589793 6.283185307179586 9.869604401089358│
+└─────────────────────────────────────────────────────┘
+   math:cos pi          ⍝ cosine of pi
+-1.0
+   {+/((math:cos⍵)*2),((math:sin⍵)*2)} ?10
+1.0                     ⍝ theorem of trigonometry
+   
+
+⍝ matrices ========================================================
+
+   1 2 3 ×⌻ 1 2 3       ⍝ outer product, multiplication table
+┌→────┐
+↓1 2 3│
+│2 4 6│
+│3 6 9│                  
+└─────┘                 
+   {(⍳⍵) =⌻ (⍳⍵)} 3     ⍝ identity matrix
+┌→────┐
+↓1 0 0│
+│0 1 0│
+│0 0 1│
+└─────┘
+   2 3⍴⍳6               ⍝ generate matrix       
+┌→────┐
+↓0 1 2│
+│3 4 5│
+└─────┘
+   2 2⍴0 1 1 1          ⍝ reshape given vector to matrix
+┌→──┐
+↓0 1│
+│1 1│
+└───┘
+
+
+⍝ structural transforms ===========================================
+
+   ,N←2 2 3⍴⍳12         ⍝ ravel: list of atoms
+┌→────────────────────────┐
+│0 1 2 3 4 5 6 7 8 9 10 11│
+└─────────────────────────┘
+   2 6⍴,N               ⍝ no ravel with axis but you can reshape
+┌→────────────┐
+↓0 1 2 3  4  5│
+│6 7 8 9 10 11│
+└─────────────┘
+   M←3 3⍴"ABC123!@#"    ⍝ character matrix
+┌→───────┐
+↓@A @B @C│
+│@1 @2 @3│
+│@! @@ @#│
+└────────┘
